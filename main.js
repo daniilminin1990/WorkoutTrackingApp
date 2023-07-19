@@ -90,6 +90,7 @@ class App {
 
     // Обработчик события, который вызывает метод _toggleField
     inputType.addEventListener("change", this._toggleField.bind(this));
+    containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
   }
   // Метод запроса данных о местоположении от пользователя. В случае успеха запускается функция _loadMap
   _getPosition() {
@@ -271,6 +272,20 @@ class App {
     }
     form.insertAdjacentHTML("afterend", html);
   }
+  _moveToPopup(e) {
+    const workoutEL = e.target.closest(".workout");
+    console.log(workoutEL);
+    if (!workoutEL) return;
+
+    const workout = this._workouts.find(
+      (work) => work.id === workoutEL.dataset.id
+    );
+    console.log(workout);
+    this._map.setView(workout.coords, 13, {
+      animate: true,
+      pan: { duration: 1 },
+    });
+  }
 }
 
 // Запуск приложения
@@ -278,11 +293,13 @@ const app = new App();
 app._getPosition;
 
 /* 
-todo 12-9 Отображение тренировок
-Научим отображать тренировки
-8 пункт из недоделок 12-8
+todo 12-10 Плавное перемещение к тренировкам на карте
 
-Дальше просто смотри код
-
+Реализуем функционал перемещения по тренировкам.
+Когда нажимаем на одну из тренировок, карта плавно перемещается к маркеру и также, если сильно зазумили, тоже возвращаемся в исходное положение
+Т.е. добавим обработчик события на тренировки containerWorkouts, туда же, где обработчик события toggleFIeld с методом _moveToPopup, который создадим в render
+Там по id будем находить нужную тренировку и переходить по ее координатам, (из переменной workout) НО БУДЕМ ПОЛЬЗОВАТЬСЯ МЕТОДОМ API
+Также уберем реакцию на closest с помощью if
+Метод API - setView передвигает к нужному месту (из документации API)
 
 */
