@@ -43,88 +43,102 @@ Geolocation.watchPosition() (en-US): зарегистрирует функцию
 let map;
 let mapEvent;
 
-if (navigator.geolocation)
-  navigator.geolocation.getCurrentPosition(function (position) {
+class App {
+  _map;
+  _mapEvent;
+  constructor() {
+    // ЗАпуск логики приложения
+    this._getPosition();
+
+    // Обработчик события, который вызывает метод _newWorkout
+    form.addEventListener("submit", this._newWorkOut.bind(this));
+
+    // Обработчик события, который вызывает метод _toggleField
+    inputType.addEventListener("change", this._toggleField.bind(this));
+  }
+  // Метод запроса данных о местоположении от пользователя. В случае успеха запускается функция _loadMap
+  _getPosition() {
+    if (navigator.geolocation)
+      navigator.geolocation.getCurrentPosition(
+        this._loadMap.bind(this),
+
+        // Модальное окно, в случае отказа
+        function () {
+          alert("Вы не предоставили доступ к своей локации");
+        }
+      );
+  }
+
+  // Метод загрузки карты на страницу, в случае положительного ответа о предоставлении своих координат
+  _loadMap(position) {
     const {
       coords: { latitude },
     } = position;
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
 
-    map = L.map("map").setView(coords, 13);
+    this._map = L.map("map").setView(coords, 13);
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    }).addTo(this._map);
 
-    console.log(map);
-    map.on(
-      "click",
-      function (mapE) {
-        mapEvent = mapE;
-        form.classList.remove("hidden");
-        inputDistance.focus();
-      },
-      function () {
-        alert("Вы не предоставили доступ к своей локации");
-      }
-    );
+    // Обработчик события нажатия по карте, который запустит метод _showForm
+    this._map.on("click", this._showForm.bind(this));
+  }
+  // Метод отобразит форму при клике по карте
+  _showForm(mapE) {
+    this._mapEvent = mapE;
+    form.classList.remove("hidden");
+    inputDistance.focus();
+  }
+  // Метод переключения типов тренировки
+  _toggleField() {
+    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+  }
+  _newWorkOut(e) {
+    e.preventDefault();
+    inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+      inputCadence.value =
+        "";
+    console.log(this._mapEvent);
+    const { lat, lng } = this._mapEvent.latlng;
+    L.marker([lat, lng])
+      .addTo(this._map)
+      .bindPopup(
+        L.popup({
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: "mark-popup",
+        })
+      )
+      .setPopupContent("Тренировка")
+      .openPopup();
+  }
+}
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      inputDistance.value =
-        inputDuration.value =
-        inputElevation.value =
-        inputCadence.value =
-          "";
-      console.log(mapEvent);
-      const { lat, lng } = mapEvent.latlng;
-      L.marker([lat, lng])
-        .addTo(map)
-        .bindPopup(
-          L.popup({
-            maxWidth: 250,
-            minWidth: 100,
-            autoClose: false,
-            closeOnClick: false,
-            className: "mark-popup",
-          })
-        )
-        .setPopupContent("Тренировка")
-        .openPopup();
-    });
-  });
-inputType.addEventListener("change", function (e) {
-  inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
-  inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
-});
+const app = new App();
+app._getPosition;
 
 /* 
-todo 12-5 Отображение формы
-ui form это родной html тег у него класс hidden
-Будем отображать, чтобы можно было вводить значения
-Впишем это в map.on("click") перед определением координат,
-а саму реализацию появления маркера по клику нужно будет потом переместить в другое место, т.к. маркер будет появляться когда будем отправлять форму
-Сделаем курсор на InputDistance, когда жмякнем на карту (т.е. в map.on(click))
+todo 12-6 Рефакторинг в синтаксис класса
+Рефакторинг - превращение того кода, который мы писали в стиль классов
+Создадим класс и будем переносить все наши функции в этот класс
 
-Для form тоже сделаем addEventListener по "submit" и сюда вставим L.marker
+Переделывать один стиль кода в другой не самая приятная штука
 
-Но у нас остались проблемы - переменная map не глобальная, она создана в методе getCurrentPosition, соответственно ограничивается этой областью видимости и нам нужно эту переменную сделать глобальной. Вынесем ее за скобки функции
-
-Другая проблема - у нас нет mapEvent, которая в map.on function (mapEvent). Сделаем ее глобальной тоже
-
-У нас нет кнопки для отправки формы. Но по умолчанию при нажатии  ина Enter, форма отправляется
-
-Отменяем стандартное поведение для form.addEventListener, чтобы страница не перезагружалась после отправки формы
-И теперь все реализовано. При клике на точку на карте появляется форма, и при отправке формы, появляется маркер
-
-Очищаем input после отправки. inputDistance = "";
-
-У нас бег связан с высотой, а велосипед с темпом. Выбор велосипеда или бега - inputType
-В HTML есть высота, скрытая hidden. И нужно ее проявлять, а темп удалять, когда меняем тип
-Создадим изменение для inputType и воспользоваться событием change
-Так как inputCadence и inputElevation определены как document.querySelector(".form__input--cadence"), а класс form__row--hidden находится в div form__row, который объединяет label и этот input, то нам нужно менять classList содержащий hidden, то есть div, а как это сделать, не определяя этот div?! Воспользуемся методом closest().
-Этот метод возвращает ближайший родительский элемент, который соответствует заданному CSS селектору
-Чтобы так сделать, нужно дописать в inputCadence.closest(".form__row").classList.toggle("....") 
+Создаем класс App
+Внутри несколько технических методов, которые будут выполнять нужные нам процессы
+Разделим все наши функции на отдельные
+  _getPosition(){  } - будет получать позицию от наших 
+  _loadMap(){} - загружает карту, когда получим позицию
+  _showForm(){} - отобразит форму
+  _toggleField(){} - переключит бег на велосипед
+  _newWorkOut(){} - запишет новую тренировку
 */
