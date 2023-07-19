@@ -1,20 +1,5 @@
 "use strict";
 
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 const form = document.querySelector(".form");
 const containerWorkouts = document.querySelector(".workouts");
 const inputType = document.querySelector(".form__input--type");
@@ -51,13 +36,24 @@ class Workout {
     this.distance = distance;
     this.duration = duration;
   }
+
+  _setDescription() {
+    // prettier-ignore
+    const months = [
+      "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",];
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} ${
+      months[this.date.getMonth()]
+    } ${this.date.getDate()}`;
+  }
 }
 
 class Running extends Workout {
+  type = "running";
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
     this.calcPace();
+    this._setDescription();
   }
   // Метод расчета темпа
   calcPace() {
@@ -67,10 +63,12 @@ class Running extends Workout {
 }
 
 class Cycling extends Workout {
+  type = "cycling";
   constructor(coords, distance, duration, elevation) {
     super(coords, distance, duration);
     this.elevation = elevation;
     this.calcSpeed();
+    this._setDescription();
   }
   // Метод расчета скорости
   calcSpeed() {
@@ -78,12 +76,6 @@ class Cycling extends Workout {
     return this.speed;
   }
 }
-
-const run1 = new Running([30, -42], 5, 24, 170);
-const cycling1 = new Cycling([30, -42], 26, 90, 500);
-
-console.log(run1);
-console.log(cycling1);
 
 class App {
   _workouts = [];
@@ -195,9 +187,15 @@ class App {
     // Добавлять созданные новые тренировки в массив workout
 
     // 6 Рендер маркера тренировки на карте // отобразить маркер
-    this.renderWorkMarker(workout);
+    this._renderWorkMarker(workout);
+
+    // Рендер тренировки
+    this._renderWorkout(workout);
+
+    // Очистить поля ввода и спрятать форму
+    this._hideForm();
   }
-  renderWorkMarker(workout) {
+  _renderWorkMarker(workout) {
     L.marker(workout.coords)
       .addTo(this._map)
       .bindPopup(
@@ -209,49 +207,82 @@ class App {
           className: "mark-popup",
         })
       )
-      .setPopupContent("workout.distance")
+      .setPopupContent(
+        `${workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"} ${workout.description}`
+      )
       .openPopup();
+  }
+  // 7 Очистить поля ввода и спрятать форму
+  _hideForm() {
+    inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+      inputCadence.value =
+        "";
+    form.classList.add("hidden");
+  }
+  // 8 Рендер списка тренировок
+  _renderWorkout(workout) {
+    let html = `
+    <li class="workout workout--${workout.type}" data-id="${workout.id}">
+    <h2 class="workout__title">${workout.description}</h2>
+    <div class="workout__details">
+      <span class="workout__icon">${
+        workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"
+      }</span>
+      <span class="workout__value">${workout.distance}</span>
+      <span class="workout__unit">км</span>
+    </div>
+    <div class="workout__details">
+      <span class="workout__icon">⏱</span>
+      <span class="workout__value">${workout.duration}</span>
+      <span class="workout__unit">мин</span>
+    </div>`;
+    if (workout.type === "running") {
+      html += `
+          <div class="workout__details">
+            <span class="workout__icon">⚡️</span>
+            <span class="workout__value">${workout.pace.toFixed(1)}</span>
+            <span class="workout__unit">мин/км</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">🦶🏼</span>
+            <span class="workout__value">${workout.cadence}</span>
+            <span class="workout__unit">шаг</span>
+          </div>
+        </li>
+        
+      `;
+    }
+    if (workout.type === "cycling") {
+      html += `
+        <div class="workout__details">
+          <span class="workout__icon">⚡️</span>
+          <span class="workout__value">${workout.speed.toFixed(1)}</span>
+          <span class="workout__unit">км/час</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">⛰</span>
+          <span class="workout__value">${workout.elevation}</span>
+          <span class="workout__unit">м</span>
+        </div>
+      </li> 
+      `;
+    }
+    form.insertAdjacentHTML("afterend", html);
   }
 }
 
-// 7 Очистить поля ввода и спрятать форму
-inputDistance.value =
-  inputDuration.value =
-  inputElevation.value =
-  inputCadence.value =
-    "";
-console.log(this._mapEvent);
-
+// Запуск приложения
 const app = new App();
 app._getPosition;
 
-// 8 Рендер списка тренировок
-
 /* 
-todo 12-8 Валидация форм
-Когда будем писать что-то неправильно, будет выскакивать alert об ошибке, донастроим класс App и напишем методы
-Доделаем функцию _newWorkout, которая будет рендерить все, что нам нужно
-1) Данные из форм
-2) Проверить что данные корректны, т.е. устроить валидацию (строка вместо числа, отрицательное число)
-3) Если создаем пробежку, то должны создать объект пробежки
-4) Если велик, то создать объект велосипед
-5) Добавлять созданные новые тренировки в массив workout
-6) Рендер маркера тренировки на карте // отобразить маркер
-7) Очистить поля ввода и спрятать форму
-8) Рендер списка тренировок
+todo 12-9 Отображение тренировок
+Научим отображать тренировки
+8 пункт из недоделок 12-8
 
-_newWorkOut
-Создали проверку введенных данных и сократим, положим в функцию и будем вызывать во все нужные момент
-Создали переменную const validInputs = воспользуемся оператором rest, чтобы собирать всевозможные аргументы, которые будут передаваться в эту функцию в виде массива
-и там же использовали метод every на проверку inputs.every(inp => Number.isFinite(inp)
-А в местах проверки вызовем эту функцию !validInputs(distance, duration, cadence)
+Дальше просто смотри код
 
-Возникла проблема - если вводить отрицательное число, то все работает. А нам нельзя отрицательные вводить
-Поэтому опять создали переменную function Expression c const allPositive = (...inputs) => inputs.every((inp) => inp > 0);
-И используем там же, в местах проверки
 
-Переменную с координатами перенесли наверх, потому что она понадобится нам еще в другом месте
-Где Function
-
-Перемещаем появление маркеров в отдельный метод renderWorkMarker()
 */
