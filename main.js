@@ -40,8 +40,50 @@ Geolocation.watchPosition() (en-US): зарегистрирует функцию
 
 Мы же напишем прям сразу navigator.geolocation.getCurrentPosition();
 */
-let map;
-let mapEvent;
+
+// console.log((Date.now() + "").slice(-10));
+
+class Workout {
+  date = new Date();
+  id = (Date.now() + "").slice(-10);
+  constructor(coords, distance, duration) {
+    this.coords = coords;
+    this.distance = distance;
+    this.duration = duration;
+  }
+}
+
+class Running extends Workout {
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
+    this.cadence = cadence;
+    this.calcPace();
+  }
+  // Метод расчета темпа
+  calcPace() {
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+
+class Cycling extends Workout {
+  constructor(coords, distance, duration, elevation) {
+    super(coords, distance, duration);
+    this.elevation = elevation;
+    this.calcSpeed();
+  }
+  // Метод расчета скорости
+  calcSpeed() {
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
+const run1 = new Running([30, -42], 5, 24, 170);
+const cycling1 = new Cycling([30, -42], 26, 90, 500);
+
+console.log(run1);
+console.log(cycling1);
 
 class App {
   _map;
@@ -127,18 +169,13 @@ const app = new App();
 app._getPosition;
 
 /* 
-todo 12-6 Рефакторинг в синтаксис класса
-Рефакторинг - превращение того кода, который мы писали в стиль классов
-Создадим класс и будем переносить все наши функции в этот класс
+todo 12-7 Создаем классы тренировок
+Создадим несколько классов, которые будут касаться тренировки
+Родительский класс и пару дочерних, которые будут наследовать свойства и добавлять свои, в зависимости от этой тренировки
+Создали класс Workout, там уникальный идентификатор тренировки, который является 10 последними символами миллисекунд от 1970 года.
 
-Переделывать один стиль кода в другой не самая приятная штука
+У нас есть 2 вида тренировок: running и cycling, под них создадим еще отдельные классы
+Класс Running и Cycling, который унаследовали от Workout + свои методы и свойства
 
-Создаем класс App
-Внутри несколько технических методов, которые будут выполнять нужные нам процессы
-Разделим все наши функции на отдельные
-  _getPosition(){  } - будет получать позицию от наших 
-  _loadMap(){} - загружает карту, когда получим позицию
-  _showForm(){} - отобразит форму
-  _toggleField(){} - переключит бег на велосипед
-  _newWorkOut(){} - запишет новую тренировку
+Применение логики создания новых экземпляров в след уроке
 */
