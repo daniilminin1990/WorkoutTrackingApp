@@ -86,6 +86,7 @@ console.log(run1);
 console.log(cycling1);
 
 class App {
+  _workouts = [];
   _map;
   _mapEvent;
   constructor() {
@@ -142,14 +143,62 @@ class App {
   }
   _newWorkOut(e) {
     e.preventDefault();
-    inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-      inputCadence.value =
-        "";
-    console.log(this._mapEvent);
-    const { lat, lng } = this._mapEvent.latlng;
-    L.marker([lat, lng])
+
+    const validInputs = (...inputs) =>
+      inputs.every((inp) => Number.isFinite(inp));
+    const allPositive = (...inputs) => inputs.every((inp) => inp > 0);
+
+    // Данные из форм
+    const { lat, lng } = this._mapEvent.latlng; // координаты
+    const type = inputType.value; // running или cycling
+    const distance = +inputDistance.value; // distance
+    const duration = +inputDuration.value;
+    let workout;
+    if (type === "running") {
+      const cadence = +inputCadence.value;
+
+      // Проверка
+      if (
+        // ю !Number.isFinite(distance) ||
+        // ю !Number.isFinite(duration) ||
+        // ю !Number.isFinite(cadence)
+        !validInputs(distance, duration, cadence) ||
+        !allPositive(distance, duration, cadence)
+      ) {
+        return alert("Необходимо ввести целое положительное число");
+      }
+      workout = new Running([lat, lng], distance, duration, cadence);
+    }
+
+    if (type === "cycling") {
+      const elevation = +inputCadence.value;
+
+      // Проверка
+      if (
+        !validInputs(distance, duration, elevation) ||
+        !allPositive(distance, duration)
+      ) {
+        return alert("Необходимо ввести целое положительное число");
+      }
+      workout = new Cycling([lat, lng], distance, duration, elevation);
+    }
+
+    this._workouts.push(workout);
+    console.log(this._workouts);
+
+    // Проверить что данные корректны, т.е. устроить валидацию (строка вместо числа, отрицательное число)
+
+    // Если создаем пробежку, то должны создать объект пробежки
+
+    // Если велик, то создать объект велосипед
+
+    // Добавлять созданные новые тренировки в массив workout
+
+    // 6 Рендер маркера тренировки на карте // отобразить маркер
+    this.renderWorkMarker(workout);
+  }
+  renderWorkMarker(workout) {
+    L.marker(workout.coords)
       .addTo(this._map)
       .bindPopup(
         L.popup({
@@ -160,22 +209,49 @@ class App {
           className: "mark-popup",
         })
       )
-      .setPopupContent("Тренировка")
+      .setPopupContent("workout.distance")
       .openPopup();
   }
 }
 
+// 7 Очистить поля ввода и спрятать форму
+inputDistance.value =
+  inputDuration.value =
+  inputElevation.value =
+  inputCadence.value =
+    "";
+console.log(this._mapEvent);
+
 const app = new App();
 app._getPosition;
 
+// 8 Рендер списка тренировок
+
 /* 
-todo 12-7 Создаем классы тренировок
-Создадим несколько классов, которые будут касаться тренировки
-Родительский класс и пару дочерних, которые будут наследовать свойства и добавлять свои, в зависимости от этой тренировки
-Создали класс Workout, там уникальный идентификатор тренировки, который является 10 последними символами миллисекунд от 1970 года.
+todo 12-8 Валидация форм
+Когда будем писать что-то неправильно, будет выскакивать alert об ошибке, донастроим класс App и напишем методы
+Доделаем функцию _newWorkout, которая будет рендерить все, что нам нужно
+1) Данные из форм
+2) Проверить что данные корректны, т.е. устроить валидацию (строка вместо числа, отрицательное число)
+3) Если создаем пробежку, то должны создать объект пробежки
+4) Если велик, то создать объект велосипед
+5) Добавлять созданные новые тренировки в массив workout
+6) Рендер маркера тренировки на карте // отобразить маркер
+7) Очистить поля ввода и спрятать форму
+8) Рендер списка тренировок
 
-У нас есть 2 вида тренировок: running и cycling, под них создадим еще отдельные классы
-Класс Running и Cycling, который унаследовали от Workout + свои методы и свойства
+_newWorkOut
+Создали проверку введенных данных и сократим, положим в функцию и будем вызывать во все нужные момент
+Создали переменную const validInputs = воспользуемся оператором rest, чтобы собирать всевозможные аргументы, которые будут передаваться в эту функцию в виде массива
+и там же использовали метод every на проверку inputs.every(inp => Number.isFinite(inp)
+А в местах проверки вызовем эту функцию !validInputs(distance, duration, cadence)
 
-Применение логики создания новых экземпляров в след уроке
+Возникла проблема - если вводить отрицательное число, то все работает. А нам нельзя отрицательные вводить
+Поэтому опять создали переменную function Expression c const allPositive = (...inputs) => inputs.every((inp) => inp > 0);
+И используем там же, в местах проверки
+
+Переменную с координатами перенесли наверх, потому что она понадобится нам еще в другом месте
+Где Function
+
+Перемещаем появление маркеров в отдельный метод renderWorkMarker()
 */
