@@ -85,6 +85,9 @@ class App {
     // ЗАпуск логики приложения
     this._getPosition();
 
+    // Получение данных из LS (localStorage)
+    this._getLocalStorage();
+
     // Обработчик события, который вызывает метод _newWorkout
     form.addEventListener("submit", this._newWorkOut.bind(this));
 
@@ -122,13 +125,19 @@ class App {
 
     // Обработчик события нажатия по карте, который запустит метод _showForm
     this._map.on("click", this._showForm.bind(this));
+
+    this._workouts.forEach((work) => {
+      this._renderWorkMarker(work);
+    });
   }
+
   // Метод отобразит форму при клике по карте
   _showForm(mapE) {
     this._mapEvent = mapE;
     form.classList.remove("hidden");
     inputDistance.focus();
   }
+
   // Метод переключения типов тренировки
   _toggleField() {
     inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
@@ -195,6 +204,9 @@ class App {
 
     // Очистить поля ввода и спрятать форму
     this._hideForm();
+
+    // Сохранение данных о тренировках при перезагрузке страницы
+    this._setLocalStorage();
   }
   _renderWorkMarker(workout) {
     L.marker(workout.coords)
@@ -286,20 +298,54 @@ class App {
       pan: { duration: 1 },
     });
   }
+  _setLocalStorage() {
+    localStorage.setItem("workouts", JSON.stringify(this._workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+    console.log(data);
+
+    if (!data) return;
+
+    this._workouts = data;
+    this._workouts.forEach((work) => {
+      this._renderWorkout(work);
+      // метод this._renderWorkMarker не срабатывает сразу, т.к. сперва должна успеть подгрузиться карта, а она не успевает
+    });
+  }
+  reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
+  }
 }
 
 // Запуск приложения
 const app = new App();
-app._getPosition;
 
 /* 
-todo 12-10 Плавное перемещение к тренировкам на карте
+todo 12-11 Работа с localStorage
+Научимся сохранять тренировки даже после обновления страницы
+Хотим, чтобы когда перезагружался сайт, все данные о наших тренировках подгружались
+Т.е. создадим новый метод _setLocalStorage();
+Создадим его внизу
+Воспользуемся еще одним API, который предоставляет браузер - LOCALSTORAGE
+У него есть методы, например setItem('1 аргумент - название того, что будем хранить', "2 арг - что именно будет храниться")
+2 аргментом будем пользоваться созданием независимой копии объекта через JSON (преобразует объект в строку) - JSON.stringify(this._workouts)
 
-Реализуем функционал перемещения по тренировкам.
-Когда нажимаем на одну из тренировок, карта плавно перемещается к маркеру и также, если сильно зазумили, тоже возвращаемся в исходное положение
-Т.е. добавим обработчик события на тренировки containerWorkouts, туда же, где обработчик события toggleFIeld с методом _moveToPopup, который создадим в render
-Там по id будем находить нужную тренировку и переходить по ее координатам, (из переменной workout) НО БУДЕМ ПОЛЬЗОВАТЬСЯ МЕТОДОМ API
-Также уберем реакцию на closest с помощью if
-Метод API - setView передвигает к нужному месту (из документации API)
+Теперь создаются копии тренировок в виде строки в локальном хранилище, которые не исчезают даже после обновления страницы
+Тогда создадим еще один метод, который будет выводить из локального хранилища данные о тренировке (_getLocalStorage), используя очередной метод API localStorage - GETITEM
+localStorage.getIttm("workouts", ""). И все это обернем в метод обратной конвертации из строки в обычный вид - JSON.parse
 
+
+Последнее - создадим метод, который будет очищать localStorage
+reset() { // * Обрати внимание - нет нижнего подчеркивания, потому что это публичный метод
+  localStorage.removeItem("workouts");
+  location.reload(); // * Это еще один API бразуера
+}
+
+И будем удалять локальное хранилище, используя консоль и прописывая там:
+app.reset()
+
+Можно было бы и кнопку создать, но я чет лень мне пока
 */
