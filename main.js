@@ -1,36 +1,16 @@
-"use strict";
+'use strict';
 
-const form = document.querySelector(".form");
-const containerWorkouts = document.querySelector(".workouts");
-const inputType = document.querySelector(".form__input--type");
-const inputDistance = document.querySelector(".form__input--distance");
-const inputDuration = document.querySelector(".form__input--duration");
-const inputCadence = document.querySelector(".form__input--cadence");
-const inputElevation = document.querySelector(".form__input--elevation");
-
-/* 
-todo 12-2 Используем Geolocation API
-Уже созданы HTML, CSS, и определены нужные DOM элементы из HTML
-Geolocation API позволяет пользователю предоставлять своё местоположение web-приложению, если пользователь согласится предоставить его. Из соображений конфиденциальности, у пользователя будет запрошено разрешение на предоставление информации о местоположении.
-Для вызова API геолокации нужно написать
-Navigator.geolocation
-API геолокации может быть вызвано через Navigator.geolocation; это заставит браузер пользователя вывести уведомление с запросом для доступа к текущему местоположению. Если его одобрят, то браузер сможет предоставить доступ ко всем возможностям по работе с информацией о местонахождении (например, GPS).
-
-Тогда разработчику станут доступны несколько разных способов получения соответствующей информации:
-
-Geolocation.getCurrentPosition(): возвратит местоположение устройства
-Geolocation.watchPosition() (en-US): зарегистрирует функцию-обработчик, которая будет вызываться автоматически каждый раз, когда местоположение изменится, возвращая новые данные.
-
-инфа с сайта https://developer.mozilla.org/ru/docs/Web/API/Geolocation_API
-
-Мы же напишем прям сразу navigator.geolocation.getCurrentPosition();
-*/
-
-// console.log((Date.now() + "").slice(-10));
+const form = document.querySelector('.form');
+const containerWorkouts = document.querySelector('.workouts');
+const inputType = document.querySelector('.form__input-type');
+const inputDistance = document.querySelector('.form__input-distance');
+const inputDuration = document.querySelector('.form__input-duration');
+const inputCadence = document.querySelector('.form__input-cadence');
+const inputElevation = document.querySelector('.form__input-elevation');
 
 class Workout {
   date = new Date();
-  id = (Date.now() + "").slice(-10);
+  id = (Date.now() + '').slice(-10);
   constructor(coords, distance, duration) {
     this.coords = coords;
     this.distance = distance;
@@ -48,7 +28,7 @@ class Workout {
 }
 
 class Running extends Workout {
-  type = "running";
+  type = 'running';
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
@@ -63,7 +43,7 @@ class Running extends Workout {
 }
 
 class Cycling extends Workout {
-  type = "cycling";
+  type = 'cycling';
   constructor(coords, distance, duration, elevation) {
     super(coords, distance, duration);
     this.elevation = elevation;
@@ -89,11 +69,11 @@ class App {
     this._getLocalStorage();
 
     // Обработчик события, который вызывает метод _newWorkout
-    form.addEventListener("submit", this._newWorkOut.bind(this));
+    form.addEventListener('submit', this._newWorkOut.bind(this));
 
     // Обработчик события, который вызывает метод _toggleField
-    inputType.addEventListener("change", this._toggleField.bind(this));
-    containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
+    inputType.addEventListener('change', this._toggleField.bind(this));
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
   // Метод запроса данных о местоположении от пользователя. В случае успеха запускается функция _loadMap
   _getPosition() {
@@ -103,7 +83,7 @@ class App {
 
         // Модальное окно, в случае отказа
         function () {
-          alert("Вы не предоставили доступ к своей локации");
+          alert('Вы не предоставили доступ к своей локации');
         }
       );
   }
@@ -116,15 +96,15 @@ class App {
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
 
-    this._map = L.map("map").setView(coords, 13);
+    this._map = L.map('map').setView(coords, 13);
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this._map);
 
     // Обработчик события нажатия по карте, который запустит метод _showForm
-    this._map.on("click", this._showForm.bind(this));
+    this._map.on('click', this._showForm.bind(this));
 
     this._workouts.forEach((work) => {
       this._renderWorkMarker(work);
@@ -134,14 +114,14 @@ class App {
   // Метод отобразит форму при клике по карте
   _showForm(mapE) {
     this._mapEvent = mapE;
-    form.classList.remove("hidden");
+    form.classList.remove('hidden');
     inputDistance.focus();
   }
 
   // Метод переключения типов тренировки
   _toggleField() {
-    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
-    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+    inputCadence.closest('.form__row').classList.toggle('form__row-hidden');
+    inputElevation.closest('.form__row').classList.toggle('form__row-hidden');
   }
   _newWorkOut(e) {
     e.preventDefault();
@@ -156,23 +136,20 @@ class App {
     const distance = +inputDistance.value; // distance
     const duration = +inputDuration.value;
     let workout;
-    if (type === "running") {
+    if (type === 'running') {
       const cadence = +inputCadence.value;
 
       // Проверка
       if (
-        // ю !Number.isFinite(distance) ||
-        // ю !Number.isFinite(duration) ||
-        // ю !Number.isFinite(cadence)
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
       ) {
-        return alert("Необходимо ввести целое положительное число");
+        return alert('Необходимо ввести целое положительное число');
       }
       workout = new Running([lat, lng], distance, duration, cadence);
     }
 
-    if (type === "cycling") {
+    if (type === 'cycling') {
       const elevation = +inputCadence.value;
 
       // Проверка
@@ -180,7 +157,7 @@ class App {
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration)
       ) {
-        return alert("Необходимо ввести целое положительное число");
+        return alert('Необходимо ввести целое положительное число');
       }
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
@@ -188,15 +165,6 @@ class App {
     this._workouts.push(workout);
     console.log(this._workouts);
 
-    // Проверить что данные корректны, т.е. устроить валидацию (строка вместо числа, отрицательное число)
-
-    // Если создаем пробежку, то должны создать объект пробежки
-
-    // Если велик, то создать объект велосипед
-
-    // Добавлять созданные новые тренировки в массив workout
-
-    // 6 Рендер маркера тренировки на карте // отобразить маркер
     this._renderWorkMarker(workout);
 
     // Рендер тренировки
@@ -217,31 +185,31 @@ class App {
           minWidth: 100,
           autoClose: false,
           closeOnClick: false,
-          className: "mark-popup",
+          className: 'mark-popup',
         })
       )
       .setPopupContent(
-        `${workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"} ${workout.description}`
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
       )
       .openPopup();
   }
-  // 7 Очистить поля ввода и спрятать форму
+  // Очистить поля ввода и спрятать форму
   _hideForm() {
     inputDistance.value =
       inputDuration.value =
       inputElevation.value =
       inputCadence.value =
-        "";
-    form.classList.add("hidden");
+        '';
+    form.classList.add('hidden');
   }
-  // 8 Рендер списка тренировок
+  // Рендер списка тренировок
   _renderWorkout(workout) {
     let html = `
-    <li class="workout workout--${workout.type}" data-id="${workout.id}">
+    <li class="workout workout-${workout.type}" data-id="${workout.id}">
     <h2 class="workout__title">${workout.description}</h2>
     <div class="workout__details">
       <span class="workout__icon">${
-        workout.type === "running" ? "🏃‍♂️" : "🚴‍♀️"
+        workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
       <span class="workout__value">${workout.distance}</span>
       <span class="workout__unit">км</span>
@@ -251,7 +219,7 @@ class App {
       <span class="workout__value">${workout.duration}</span>
       <span class="workout__unit">мин</span>
     </div>`;
-    if (workout.type === "running") {
+    if (workout.type === 'running') {
       html += `
           <div class="workout__details">
             <span class="workout__icon">⚡️</span>
@@ -267,7 +235,7 @@ class App {
         
       `;
     }
-    if (workout.type === "cycling") {
+    if (workout.type === 'cycling') {
       html += `
         <div class="workout__details">
           <span class="workout__icon">⚡️</span>
@@ -282,11 +250,10 @@ class App {
       </li> 
       `;
     }
-    form.insertAdjacentHTML("afterend", html);
+    form.insertAdjacentHTML('afterend', html);
   }
   _moveToPopup(e) {
-    const workoutEL = e.target.closest(".workout");
-    console.log(workoutEL);
+    const workoutEL = e.target.closest('.workout');
     if (!workoutEL) return;
 
     const workout = this._workouts.find(
@@ -299,12 +266,11 @@ class App {
     });
   }
   _setLocalStorage() {
-    localStorage.setItem("workouts", JSON.stringify(this._workouts));
+    localStorage.setItem('workouts', JSON.stringify(this._workouts));
   }
 
   _getLocalStorage() {
-    const data = JSON.parse(localStorage.getItem("workouts"));
-    console.log(data);
+    const data = JSON.parse(localStorage.getItem('workouts'));
 
     if (!data) return;
 
@@ -315,37 +281,10 @@ class App {
     });
   }
   reset() {
-    localStorage.removeItem("workouts");
+    localStorage.removeItem('workouts');
     location.reload();
   }
 }
 
 // Запуск приложения
 const app = new App();
-
-/* 
-todo 12-11 Работа с localStorage
-Научимся сохранять тренировки даже после обновления страницы
-Хотим, чтобы когда перезагружался сайт, все данные о наших тренировках подгружались
-Т.е. создадим новый метод _setLocalStorage();
-Создадим его внизу
-Воспользуемся еще одним API, который предоставляет браузер - LOCALSTORAGE
-У него есть методы, например setItem('1 аргумент - название того, что будем хранить', "2 арг - что именно будет храниться")
-2 аргментом будем пользоваться созданием независимой копии объекта через JSON (преобразует объект в строку) - JSON.stringify(this._workouts)
-
-Теперь создаются копии тренировок в виде строки в локальном хранилище, которые не исчезают даже после обновления страницы
-Тогда создадим еще один метод, который будет выводить из локального хранилища данные о тренировке (_getLocalStorage), используя очередной метод API localStorage - GETITEM
-localStorage.getIttm("workouts", ""). И все это обернем в метод обратной конвертации из строки в обычный вид - JSON.parse
-
-
-Последнее - создадим метод, который будет очищать localStorage
-reset() { // * Обрати внимание - нет нижнего подчеркивания, потому что это публичный метод
-  localStorage.removeItem("workouts");
-  location.reload(); // * Это еще один API бразуера
-}
-
-И будем удалять локальное хранилище, используя консоль и прописывая там:
-app.reset()
-
-Можно было бы и кнопку создать, но я чет лень мне пока
-*/

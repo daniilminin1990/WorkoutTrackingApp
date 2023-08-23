@@ -1,16 +1,12 @@
 :root {
-  --color-brand--1: #ffb545;
-  --color-brand--2: #00c46a;
+  --color-brand-1: #ffb545;
+  --color-brand-2: #00c46a;
 
-  --color-dark--1: linear-gradient(
-    35deg,
-    #b92b27 0%,
-    rgba(21, 101, 192, 1) 100%
-  );
-  --color-dark--2: #226093;
-  --color-light--1: #aaa;
-  --color-light--2: #ececec;
-  --color-light--3: rgb(214, 222, 224);
+  --color-dark-1: linear-gradient(35deg, #297466 0%, rgb(54, 137, 232) 100%);
+  --color-dark-2: #226093;
+  --color-light-1: rgb(252, 229, 217);
+  --color-light-2: #ececec;
+  --color-light-3: rgb(214, 222, 224);
 }
 
 * {
@@ -25,8 +21,8 @@ html {
 }
 
 body {
-  font-family: "Manrope", sans-serif;
-  color: var(--color-light--2);
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-light-2);
   font-weight: 400;
   line-height: 1.6;
   height: 100vh;
@@ -40,12 +36,12 @@ body {
 
 a:link,
 a:visited {
-  color: var(--color-brand--1);
+  color: var(--color-brand-1);
 }
 
 .sidebar {
   flex-basis: 62rem;
-  background: var(--color-dark--1);
+  background: var(--color-dark-1);
   padding: 3rem 5rem 4rem 5rem;
   display: flex;
   flex-direction: column;
@@ -86,7 +82,7 @@ a:visited {
   backdrop-filter: blur(300px);
   -webkit-backdrop-filter: blur(300px);
   border-radius: 5px;
-  border: 0.1px solid gray;
+  border: 0.1px solid rgb(207, 174, 174);
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
   cursor: pointer;
@@ -94,11 +90,11 @@ a:visited {
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
 }
-.workout--running {
-  border-bottom: 5px solid var(--color-brand--2);
+.workout-running {
+  border-bottom: 5px solid var(--color-brand-2);
 }
-.workout--cycling {
-  border-bottom: 5px solid var(--color-brand--2);
+.workout-cycling {
+  border-bottom: 5px solid var(--color-brand-2);
 }
 
 .workout__title {
@@ -125,7 +121,7 @@ a:visited {
 
 .workout__unit {
   font-size: 1.1rem;
-  color: var(--color-light--1);
+  color: var(--color-light-1);
   text-transform: uppercase;
   font-weight: 800;
   text-shadow: 0.2px 0.2px 0.1px black;
@@ -159,7 +155,7 @@ a:visited {
   align-items: center;
 }
 
-.form__row--hidden {
+.form__row-hidden {
   display: none;
 }
 
@@ -176,7 +172,7 @@ a:visited {
   font-size: 1.4rem;
   border: none;
   border-radius: 3px;
-  background-color: var(--color-light--3);
+  background-color: var(--color-light-3);
   transition: all 0.2s;
   text-shadow: 0.2px 0.2px 0.1px black;
 }
@@ -194,32 +190,32 @@ a:visited {
   margin-top: auto;
   font-size: 1.3rem;
   text-align: center;
-  color: var(--color-light--1);
+  color: var(--color-light-1);
   text-shadow: 0.2px 0.2px 0.1px black;
 }
 
 .twitter-link:link,
 .twitter-link:visited {
-  color: var(--color-light--1);
+  color: var(--color-light-1);
   transition: all 0.2s;
   text-shadow: 0.2px 0.2px 0.1px black;
 }
 
 .twitter-link:hover,
 .twitter-link:active {
-  color: var(--color-light--2);
+  color: var(--color-light-2);
   text-shadow: 0.2px 0.2px 0.1px black;
 }
 
 #map {
   flex: 1;
   height: 100%;
-  background-color: var(--color-light--1);
+  background-color: var(--color-light-1);
 }
 
 .leaflet-popup .leaflet-popup-content-wrapper {
   background-color: black;
-  color: var(--color-light--2);
+  color: var(--color-light-2);
   border-radius: 5px;
   padding-right: 0.6rem;
   text-shadow: 0.2px 0.2px 0.1px black;
@@ -227,5 +223,5 @@ a:visited {
 }
 
 .mark-popup .leaflet-popup-content-wrapper {
-  border-bottom: 5px solid var(--color-brand--2);
+  border-bottom: 5px solid var(--color-brand-2);
 }
